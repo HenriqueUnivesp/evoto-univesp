@@ -9,39 +9,33 @@ yum update -y
 
 # Instalar dependências
 echo "Instalando dependências..."
-yum install -y python3 python3-devel mysql-devel gcc git
+# Incluindo dependências para Pillow (biblioteca de processamento de imagens)
+yum install -y python3 python3-devel mariadb-devel gcc git zlib-devel libjpeg-devel freetype-devel
 
 # Criar diretório para logs do Gunicorn
 mkdir -p /var/log/gunicorn
 chmod 777 /var/log/gunicorn
 
-# Configurar o MySQL
-echo "Instalando MySQL..."
-# Adicionar repositório do MySQL
-echo "[mysql80-community]
-name=MySQL 8.0 Community Server
-baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
-enabled=1
-gpgcheck=0" | tee /etc/yum.repos.d/mysql-community.repo
+# Configurar o MariaDB
+echo "Instalando MariaDB..."
 
-# Instalar MySQL
-yum install -y mysql-community-server
+# Instalar MariaDB
+yum install -y mariadb-server
 
-# Iniciar e habilitar o MySQL
-systemctl start mysqld
-systemctl enable mysqld
+# Iniciar e habilitar o MariaDB
+systemctl start mariadb
+systemctl enable mariadb
 
-# Obter a senha temporária gerada para o usuário root
-echo "A senha temporária do MySQL root pode ser encontrada em:"
-echo "grep 'temporary password' /var/log/mysqld.log"
-echo "Você precisará alterar esta senha usando o comando: mysql_secure_installation"
+# Informações sobre a configuração inicial
+echo "Para configurar o MariaDB com segurança, execute o comando: sudo mysql_secure_installation"
+echo "Você pode definir uma senha para o usuário root durante este processo"
 
 # Configurar o banco de dados (você precisará executar estes comandos manualmente)
 echo "Para configurar o banco de dados, execute os seguintes comandos:"
 echo "mysql -u root -p"
 echo "CREATE DATABASE sistema_eleicao CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-echo "CREATE USER 'seu_usuario_mysql'@'localhost' IDENTIFIED BY 'sua_senha_mysql';"
-echo "GRANT ALL PRIVILEGES ON sistema_eleicao.* TO 'seu_usuario_mysql'@'localhost';"
+echo "CREATE USER 'seu_usuario_mariadb'@'localhost' IDENTIFIED BY 'sua_senha_mariadb';"
+echo "GRANT ALL PRIVILEGES ON sistema_eleicao.* TO 'seu_usuario_mariadb'@'localhost';"
 echo "FLUSH PRIVILEGES;"
 echo "EXIT;"
 
@@ -49,6 +43,19 @@ echo "EXIT;"
 echo "Configurando ambiente Python..."
 pip3 install --upgrade pip
 pip3 install virtualenv
+
+# Criar e ativar ambiente virtual
+if [ ! -d "venv" ]; then
+    echo "Criando ambiente virtual..."
+    python3 -m virtualenv venv
+fi
+
+# Instalar dependências Python incluindo Pillow
+echo "Instalando dependências Python..."
+source venv/bin/activate
+pip install -r requirements.txt
+pip install pillow
+deactivate
 
 # Instalar e configurar Nginx
 echo "Instalando Nginx..."
