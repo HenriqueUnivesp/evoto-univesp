@@ -32,10 +32,14 @@ INSTALLED_APPS = [
     # Apps do projeto
     'accounts.apps.AccountsConfig',
     'election.apps.ElectionConfig',  # Adicionado o app election
+    
+    # Whitenoise para servir arquivos estáticos
+    'whitenoise.runserver_nostatic',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -122,6 +126,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Configuração do Whitenoise para servir arquivos estáticos
+WHITENOISE_USE_FINDERS = True
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
